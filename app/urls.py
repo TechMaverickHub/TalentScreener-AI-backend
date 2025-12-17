@@ -42,6 +42,7 @@ urlpatterns = [
 
     # App URLs
     path('api/user/', include('app.user.urls')),
+    path('api/jobrole/', include('app.jobrole.urls')),
 ]
 
 if settings.DEBUG:
