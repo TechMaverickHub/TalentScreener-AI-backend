@@ -43,8 +43,6 @@ class StoreJDOrResumeApiView(GenericAPIView):
 
         }
 
-        print(job_role_data)
-
         serializer = JobRoleSerializer(data=job_role_data)
 
         if serializer.is_valid():

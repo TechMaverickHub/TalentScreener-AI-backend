@@ -216,3 +216,7 @@ __init__.py
 
 *.xml
 *.iml
+
+*.pkl
+
+*.idea
