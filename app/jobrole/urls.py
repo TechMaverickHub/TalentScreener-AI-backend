@@ -1,13 +1,12 @@
 from django.urls import path
 
-from app.jobrole.views import StoreJDOrResumeApiView
-from app.user.views import SuperAdminSetupView, UserLogin, UserLogout, AdminSetupView, AdminListFilter, UserDetailAPI, \
-    UserSetupView
+from app.jobrole.views import HybridSearchApiView, CandidateSearchFromResumeTextApiView, \
+    StoreJobRoleApiView
 
 urlpatterns = [
 
-    path('store-jd-or-resume/', StoreJDOrResumeApiView.as_view(), name='store-jd-or-resume'),
-
-
+    path('store-jd', StoreJobRoleApiView.as_view(), name='store-jd-or-resume'),
+    path("hybrid-search/", HybridSearchApiView.as_view(), name="hybrid_search"),
+    path("search-jobs-by-resume/", CandidateSearchFromResumeTextApiView.as_view(), name="search_jobs_by_resume"),
 
 ]
