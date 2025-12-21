@@ -220,3 +220,7 @@ __init__.py
 *.pkl
 
 *.idea
+
+#faiss
+*.faiss
+
