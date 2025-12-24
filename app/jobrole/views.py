@@ -5,10 +5,14 @@ from PyPDF2 import PdfReader
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from app.jobrole.serializers import JobRoleListFilterSerializer
+from app.core.views import CustomPageNumberPagination
 from app.global_constants import SuccessMessage, ErrorMessage
+from app.jobrole.models import JobRole
 from app.jobrole.serializers import JobRoleSerializer
 from app.jobrole.utils import parse_job_description_with_llm, parse_resume_with_llm, flatten_resume_dict
 from app.langchain_utils.search import search_matching_documents_new_2
@@ -129,3 +133,37 @@ class MatchResumeToJobsAPIView(GenericAPIView):
         resume_data = flatten_resume_dict(resume_data)
         results = search_matching_documents_new_2(query_text=resume_data, filter_type="job")
         return get_response_schema(results, SuccessMessage.RECORD_RETRIEVED.value, status.HTTP_200_OK)
+
+
+class JobRoleListFilterAPIView(ListAPIView):
+    permission_classes = [IsSuperAdmin]
+    authentication_classes = [JWTAuthentication]
+
+    serializer_class = JobRoleListFilterSerializer
+    pagination_class = CustomPageNumberPagination
+
+    def get_queryset(self):
+
+        queryset = JobRole.objects.filter(is_active=True).order_by('-updated')
+
+        # Filter by title
+        if self.request.query_params.get('title'):
+            queryset = queryset.filter(title__istartswith=self.request.query_params.get('title'))
+
+        # Filter by description
+        if self.request.query_params.get('description'):
+            queryset = queryset.filter(description__icontains=self.request.query_params.get('description'))
+
+        return queryset
+
+    @swagger_auto_schema(
+        manual_parameters=[
+
+            openapi.Parameter('title', openapi.IN_QUERY, type=openapi.TYPE_STRING, required=False,
+                              description='Filter by title'),
+            openapi.Parameter('description', openapi.IN_QUERY, type=openapi.TYPE_STRING, required=False),
+
+        ]
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)

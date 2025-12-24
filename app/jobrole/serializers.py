@@ -21,3 +21,8 @@ class JobRoleSerializer(serializers.ModelSerializer):
         if len(value.strip()) < 100:
             raise serializers.ValidationError("Description must be at least 100 characters.")
         return value
+
+class JobRoleListFilterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JobRole
+        fields = ('title', 'description')
