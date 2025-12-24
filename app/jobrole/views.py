@@ -9,6 +9,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAdminUser
 
+from app.global_constants import SuccessMessage, ErrorMessage
 from app.jobrole.serializers import JobRoleSerializer
 from app.jobrole.utils import parse_job_description_with_llm, parse_resume_with_llm, flatten_resume_dict
 from app.langchain_utils.search import search_matching_documents_new_2
@@ -42,7 +43,7 @@ class UploadJobDescriptionAPIView(GenericAPIView):
         description = request.data.get("description")
 
         if not title or not description:
-            return get_response_schema({}, "Title and description are required", status.HTTP_400_BAD_REQUEST)
+            return get_response_schema({}, ErrorMessage.MISSING_FIELDS.value, status.HTTP_400_BAD_REQUEST)
 
         structured_data = parse_job_description_with_llm(description)
 
@@ -74,9 +75,9 @@ class UploadJobDescriptionAPIView(GenericAPIView):
 
         if serializer.is_valid():
             serializer.save()
-            return get_response_schema(serializer.data, "JobRole stored successfully", status.HTTP_201_CREATED)
+            return get_response_schema(serializer.data, SuccessMessage.RECORD_CREATED.value, status.HTTP_201_CREATED)
 
-        return get_response_schema(serializer.errors, "Validation failed", status.HTTP_400_BAD_REQUEST)
+        return get_response_schema(serializer.errors, ErrorMessage.MISSING_FIELDS.value, status.HTTP_400_BAD_REQUEST)
 
 
 class UploadResumeAPIView(GenericAPIView):
@@ -125,8 +126,8 @@ class MatchResumeToJobsAPIView(GenericAPIView):
     def post(self, request):
         resume_data = request.data.get("resume_data")
         if not resume_data:
-            return get_response_schema({}, "Resume data is required", status.HTTP_400_BAD_REQUEST)
+            return get_response_schema({}, ErrorMessage.MISSING_FIELDS.value, status.HTTP_400_BAD_REQUEST)
 
         resume_data = flatten_resume_dict(resume_data)
         results = search_matching_documents_new_2(query_text=resume_data, filter_type="job")
-        return get_response_schema(results, "Matching job roles retrieved", status.HTTP_200_OK)
+        return get_response_schema(results, SuccessMessage.RECORD_RETRIEVED.value, status.HTTP_200_OK)
