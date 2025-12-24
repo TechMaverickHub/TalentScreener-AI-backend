@@ -62,7 +62,7 @@ class SuperAdminSetupView(GenericAPIView):
 
 class UserSetupView(GenericAPIView):
     """ View: Admin setup """
-    throttle_classes = [UserCreateThrottle]
+    # throttle_classes = [UserCreateThrottle]
 
     @swagger_auto_schema(
         request_body=openapi.Schema(

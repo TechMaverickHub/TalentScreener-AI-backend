@@ -7,6 +7,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import IsAdminUser
 
 from app.jobrole.serializers import JobRoleSerializer
 from app.jobrole.utils import extract_relevant_sections_with_llm, extract_job_keywords_from_resume, \
@@ -16,6 +17,7 @@ from app.langchain_utils.search import search_matching_documents, search_matchin
 from app.langchain_utils.store import store_job_description
 from app.langchain_utils.vectorstore import embedding_model, safe_vector_format
 from app.utils import get_response_schema
+from permissions import IsSuperAdmin, IsUser
 
 
 # Create your views here.
@@ -120,6 +122,7 @@ class CandidateSearchFromResumeTextApiView(GenericAPIView):
 
 class UploadJobDescriptionAPIView(GenericAPIView):
 
+    permission_classes = [IsAdminUser]
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -176,7 +179,9 @@ class UploadJobDescriptionAPIView(GenericAPIView):
         return get_response_schema(serializer.errors, "Validation failed", status.HTTP_400_BAD_REQUEST)
 
 class UploadResumeAPIView(GenericAPIView):
+
     parser_classes = (MultiPartParser, FormParser)
+    permission_classes = [IsUser]
 
     @swagger_auto_schema(
         operation_description='Upload a PDF file for ingestion. The file will be processed synchronously.',
@@ -205,6 +210,8 @@ class UploadResumeAPIView(GenericAPIView):
         return get_response_schema(structured_resume, "Resume parsed successfully", status.HTTP_200_OK)
 
 class MatchResumeToJobsAPIView(GenericAPIView):
+
+    permission_classes = [IsUser]
 
     @swagger_auto_schema(
         request_body=openapi.Schema(

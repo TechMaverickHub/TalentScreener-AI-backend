@@ -28,8 +28,6 @@ class GlobalValues(int, Enum):
 
     # User Role
     SUPER_ADMIN = 1
-    ADMIN = 2
-    USER = 3
-    MODERATOR = 4
+    USER = 2
 
 
