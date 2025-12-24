@@ -7,7 +7,6 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.permissions import IsAdminUser
 
 from app.global_constants import SuccessMessage, ErrorMessage
 from app.jobrole.serializers import JobRoleSerializer
@@ -16,14 +15,14 @@ from app.langchain_utils.search import search_matching_documents_new_2
 from app.langchain_utils.store import store_job_description
 from app.langchain_utils.vectorstore import embedding_model, safe_vector_format
 from app.utils import get_response_schema
-from permissions import IsUser
+from permissions import IsUser, IsSuperAdmin
 
 
 # Create your views here.
 
 
 class UploadJobDescriptionAPIView(GenericAPIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsSuperAdmin]
 
     @swagger_auto_schema(
         request_body=openapi.Schema(
@@ -50,12 +49,11 @@ class UploadJobDescriptionAPIView(GenericAPIView):
         # Extract metadata fields from structured_data
         metadata = {}
         try:
-            metadata = {
-                "type": "job",
-                "title": structured_data.get("title"),
-                "location": structured_data.get("location"),
-                "department": structured_data.get("department")
-            }
+
+            metadata['type'] = "job"
+            metadata['title'] = structured_data.get("title")
+            metadata['location'] = structured_data.get("location")
+            metadata['department'] = structured_data.get("department")
         except Exception:
             metadata = {"type": "job"}
 
